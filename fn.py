@@ -58,6 +58,7 @@ def verify_certificate(cert_data):
     
     except Exception as e:
         return False, f"Verification error: {str(e)}"
+    
     finally:
         # Clean up temp file
         if temp_path:
@@ -101,6 +102,8 @@ def lambda_handler(event, context):
                         print("Successfully decoded Base64 certificate")
                 except Exception as decode_err:
                     print(f"Not Base64 encoded or decoding failed: {str(decode_err)}")
+            except Exception as base64_err:
+                print(f"Base64 processing error: {str(base64_err)}")
         
         # Verify certificate with OpenSSL
         is_valid, details = verify_certificate(clean_cert)
