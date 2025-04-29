@@ -12,13 +12,14 @@ def verify_certificate(cert_data):
     Returns tuple (is_valid, details)
     """
     results = {}
-    
-    # Create a temporary file for the certificate
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.pem') as temp:
-        temp.write(cert_data.encode('utf-8'))
-        temp_path = temp.name
+    temp_path = None
     
     try:
+        # Create a temporary file for the certificate
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pem') as temp:
+            temp.write(cert_data.encode('utf-8'))
+            temp_path = temp.name
+        
         # Check if certificate is parseable and get basic info
         result = subprocess.run(
             ['openssl', 'x509', '-in', temp_path, '-text', '-noout'],
@@ -59,10 +60,11 @@ def verify_certificate(cert_data):
         return False, f"Verification error: {str(e)}"
     finally:
         # Clean up temp file
-        try:
-            os.unlink(temp_path)
-        except:
-            pass
+        if temp_path:
+            try:
+                os.unlink(temp_path)
+            except:
+                pass
 
 def lambda_handler(event, context):
     try:
